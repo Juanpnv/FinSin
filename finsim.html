@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FinSim — Suas escolhas. Seu futuro.</title>
+<style>
+:root{
+  --bg:#F5F6F8; --bg-elev:#FFFFFF; --text:#161A1F; --text-dim:#5C6570;
+  --border:#E1E4E9; --accent:#0E9E74; --accent-ink:#08553D; --warn:#C9852E; --danger:#C6432F;
+  --radius:10px; --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1416; --bg-elev:#171F22; --text:#EDEFEC; --text-dim:#95A29F;
+    --border:#293235; --accent:#17C48C; --accent-ink:#9DEFCB; --warn:#E0A24F; --danger:#E36B57;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1416; --bg-elev:#171F22; --text:#EDEFEC; --text-dim:#95A29F;
+  --border:#293235; --accent:#17C48C; --accent-ink:#9DEFCB; --warn:#E0A24F; --danger:#E36B57;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+button,input,select,textarea{font:inherit;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-tap-highlight-color:transparent;}
+#topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
+  padding-top:calc(14px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--bg);z-index:5;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+#topbar .brand{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;}
+#topbar .brand span{color:var(--accent);}
+#themeBtn{border:1px solid var(--border);background:var(--bg-elev);color:var(--text);
+  border-radius:8px;width:36px;height:36px;font-size:1rem;cursor:pointer;filter:grayscale(1);}
+main{max-width:640px;margin:0 auto;padding:20px 18px 90px;}
+h1,h2,h3{line-height:1.25;margin:0 0 8px;letter-spacing:-.01em;font-weight:700;}
+p{line-height:1.5;color:var(--text-dim);margin:0 0 12px;}
+.btn{border-radius:8px;border:1px solid var(--border);background:var(--bg-elev);color:var(--text);
+  padding:13px 18px;font-size:.98rem;font-weight:600;cursor:pointer;min-height:46px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);transition:transform .08s ease,box-shadow .15s ease;}
+.btn:active{transform:scale(.98);box-shadow:none;}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+.btn.block{display:block;width:100%;margin-top:10px;}
+.cta-row{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto 28px;}
+.hero{padding:28px 4px 8px;text-align:center;}
+.hero .logo{font-size:2.2rem;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;}
+.hero .logo span{color:var(--accent);}
+.tagline{font-size:1.05rem;color:var(--text);font-weight:600;margin-bottom:20px;}
+.ic{filter:grayscale(1) opacity(.7);}
+.ic svg{width:20px;height:20px;vertical-align:middle;}
+.disclaimer{font-size:.78rem;border-top:1px solid var(--border);padding-top:14px;margin:24px auto 0;max-width:360px;text-align:left;}
+.card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.card.big{border-top:3px solid var(--accent);}
+.card.big .amount{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.grid3 .card{padding:10px;margin:0;}
+.grid3 .amount{font-size:1.05rem;font-weight:700;font-variant-numeric:tabular-nums;}
+.label{font-size:.72rem;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.chart{width:100%;height:70px;display:block;}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:99px;}
+.health-ok{background:rgba(14,158,116,.15);color:var(--accent-ink,var(--accent));}
+.health-warn{background:rgba(201,133,46,.15);color:var(--warn);}
+.health-bad{background:rgba(198,67,47,.15);color:var(--danger);}
+.progress{background:var(--border);border-radius:99px;height:10px;overflow:hidden;margin:8px 0;}
+.progress-fill{background:var(--accent);height:100%;transition:width .3s ease;}
+.exp-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.exp-row:last-child{border-bottom:none;}
+.exp-row button{border:none;background:none;font-size:1.05rem;cursor:pointer;padding:2px 6px;}
+.exp-row button.del{color:var(--danger);}
+.exp-row button.edit{color:var(--text-dim);}
+form label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px;}
+input,select{width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;
+  background:var(--bg);color:var(--text);font-size:.95rem;font-family:var(--font);
+  transition:border-color .15s ease;}
+input:focus,select:focus{outline:none;border-color:var(--accent);}
+.opts-row{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0;}
+.opts-row button{border:1px solid var(--border);background:var(--bg);color:var(--text);
+  border-radius:8px;padding:9px 12px;font-size:.85rem;cursor:pointer;}
+.opts-row button.sel{background:var(--accent);border-color:var(--accent);color:#fff;}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;
+  justify-content:center;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px);}
+#overlay.hidden{display:none;}
+.modal{background:var(--bg-elev);border-radius:16px 16px 0 0;padding:22px;max-width:520px;width:100%;
+  max-height:85vh;overflow:auto;}
+@media(min-width:640px){.modal{border-radius:16px;margin-bottom:40px;}#overlay{align-items:center;}}
+.modal .opt{display:block;width:100%;text-align:left;margin-bottom:8px;}
+nav#bottomnav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg-elev);
+  border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px);z-index:10;}
+nav#bottomnav button{flex:1;background:none;border:none;color:var(--text-dim);padding:10px 2px 8px;
+  font-size:.68rem;cursor:pointer;font-family:var(--font);}
+nav#bottomnav button .ic{display:block;font-size:1.2rem;margin-bottom:2px;}
+nav#bottomnav button.active{color:var(--accent);font-weight:700;}
+@media(min-width:860px){
+  nav#bottomnav{top:0;bottom:0;left:0;right:auto;width:190px;flex-direction:column;border-top:none;
+    border-right:1px solid var(--border);padding-top:calc(70px + env(safe-area-inset-top,0px));}
+  nav#bottomnav button{text-align:left;padding:12px 20px;font-size:.9rem;display:flex;align-items:center;gap:10px;}
+  nav#bottomnav button .ic{display:inline;margin:0;}
+  main{margin-left:190px;max-width:600px;padding-bottom:40px;}
+}
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.badge{border:1px solid var(--border);border-radius:10px;padding:12px 6px;text-align:center;font-size:.75rem;background:var(--bg-elev);}
+.badge.locked{opacity:.35;}
+.badge .ic{font-size:1.5rem;display:block;margin-bottom:4px;}
+.subtabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.subtabs button{flex:1;background:none;border:none;padding:10px 4px;font-size:.85rem;font-weight:600;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;box-shadow:none;}
+.subtabs button.active{color:var(--accent);border-bottom-color:var(--accent);}
+.lesson-q{margin-top:10px;}
+.lesson-q label{font-weight:400;display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.9rem;color:var(--text);}
+.lesson-q input[type=radio]{flex-shrink:0;width:16px;height:16px;margin:0;}
+.qz-result{font-size:.85rem;font-weight:600;margin-top:8px;}
+.small{font-size:.82rem;}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">Fin<span>Sim</span></div>
+  <button id="themeBtn" onclick="toggleTheme()">◐</button>
+</div>
+<main id="app"></main>
+<div id="overlay" class="hidden"><div class="modal" id="modalBody"></div></div>
+<script>
+const CATS=[["Alimentação","🍔"],["Transporte","🚌"],["Moradia","🏠"],["Educação","📚"],["Saúde","💊"],["Lazer","🎮"],["Tecnologia","💻"],["Compras","🛍️"],["Outros","📦"]];
+const GOAL_PRESETS=["Comprar um celular","Fazer uma viagem","Montar um computador","Criar uma reserva","Comprar um produto"];
+const EVENTS=[
+ {title:"Desconto inesperado",desc:"Uma compra que você ia fazer saiu R$50 mais barata.",level:1,
+  options:[{label:"Guardar a diferença",balance:0,saved:50},{label:"Gastar em outra coisa",balance:50,saved:0}]},
+ {title:"Pequeno reparo doméstico",desc:"Um reparo simples em casa custou R$60.",level:1,
+  options:[{label:"Pagar à vista",balance:-60,saved:0},{label:"Parcelar (com juros)",balance:-70,saved:0}]},
+ {title:"Transporte inesperado",desc:"O ônibus não passou e você precisou de um transporte por aplicativo, R$40.",level:1,
+  options:[{label:"Pagar a corrida",balance:-40,saved:0},{label:"Tirar do economizado",balance:0,saved:-40}]},
+ {title:"Renda extra de R$500!",desc:"Você recebeu um bônus inesperado. O que fazer com o dinheiro?",level:2,
+  options:[{label:"Gastar tudo",balance:500,saved:0},{label:"Guardar tudo",balance:0,saved:500},
+  {label:"Dividir entre lazer e economia",balance:250,saved:250},{label:"Investir uma parte",balance:200,saved:300}]},
+ {title:"Seu celular precisa de manutenção",desc:"O conserto custa R$150. Como você paga?",level:2,
+  options:[{label:"Pagar à vista",balance:-150,saved:0},{label:"Parcelar no cartão (com juros)",balance:-170,saved:0}]},
+ {title:"Despesa médica inesperada",desc:"Uma consulta urgente custa R$200.",level:2,
+  options:[{label:"Retirar da reserva (economizado)",balance:0,saved:-200},{label:"Pagar do saldo do mês",balance:-200,saved:0}]},
+ {title:"Oportunidade de curso",desc:"Um curso custa R$120 e pode aumentar sua renda no próximo mês.",level:2,
+  options:[{label:"Investir no curso",balance:-120,saved:0,incomeBonus:80},{label:"Não investir agora",balance:0,saved:0}]},
+ {title:"Vazamento no encanamento",desc:"Um reparo urgente e caro custou R$400.",level:3,
+  options:[{label:"Pagar com o saldo",balance:-400,saved:0},{label:"Usar parte da reserva",balance:-200,saved:-200}]},
+ {title:"Redução temporária de renda",desc:"Uma queda pontual tirou R$300 da sua renda neste mês.",level:3,
+  options:[{label:"Absorver com o saldo",balance:-300,saved:0},{label:"Compensar com o economizado",balance:0,saved:-300}]}
+];
+const LVL={1:'Fácil',2:'Médio',3:'Difícil'};
+function pickEvent(){
+  let r=Math.random(),lv;
+  if(S.month<=4)lv=r<0.7?1:2;
+  else if(S.month<=8)lv=r<0.4?1:(r<0.8?2:3);
+  else lv=r<0.25?1:(r<0.65?2:3);
+  let pool=EVENTS.filter(e=>e.level===lv);
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function fmtK(n){return n>=1000?`R$${n/1000}k`:`R$${n}`;}
+function tierBadges(prefix,icon,thresholds,labelFn,valueFn){
+  return thresholds.map(t=>[prefix+'_'+t,icon,labelFn(t),()=>valueFn()>=t]);
+}
+const BADGES=[
+ ...tierBadges('mes','calendar',[1,3,5,10,15,20,24],t=>`${t} ${t===1?'mês':'meses'} simulado${t===1?'':'s'}`,()=>S.month-1),
+ ...tierBadges('eco','coin',[100,500,1000,2500,5000,10000],t=>`Economizou ${fmtK(t)}`,()=>S.saved),
+ ...tierBadges('sal','chart',[500,1000,3000,5000,10000],t=>`Saldo de ${fmtK(t)}`,()=>S.balance),
+ ...tierBadges('ren','trophy',[1000,5000,10000,25000],t=>`Recebeu ${fmtK(t)} no total`,()=>S.totalIncome),
+ ...tierBadges('desp','book',[1,5,10,20],t=>`${t} despesa${t===1?'':'s'} cadastrada${t===1?'':'s'}`,()=>S.totalExpensesAdded),
+ ...tierBadges('metac','target',[1,2,3,5,10],t=>`${t} meta${t===1?'':'s'} criada${t===1?'':'s'}`,()=>S.goals.length),
+ ...tierBadges('metaconc','coin',[1,2,3,5],t=>`${t} meta${t===1?'':'s'} concluída${t===1?'':'s'}`,()=>S.goals.filter(g=>g.current>=g.value).length),
+ ...tierBadges('desaf','flame',[1,3,5],t=>`${t} desafio${t===1?'':'s'} concluído${t===1?'':'s'}`,()=>S.challenges.length),
+ ...tierBadges('nivel','user',[2,5,10,15,20],t=>`Nível ${t} alcançado`,()=>Math.floor(S.xp/50)+1),
+ ...tierBadges('licao','check',[1,3],t=>`${t} lição${t===1?'':'ões'} correta${t===1?'':'s'}`,()=>S.quizCorrect),
+ ...tierBadges('diario','shield',[1,5,10,25,50],t=>`${t} acerto${t===1?'':'s'} no quiz diário`,()=>S.dailyQuizLifetimeCorrect)
+];
+function checkAllBadges(){BADGES.forEach(([id,ic,lb,fn])=>{if(!S.achievements.includes(id)&&fn())awardAch(id);});save();}
+const LESSONS=[
+ {title:"Necessidade x Desejo",text:"Necessidades são gastos essenciais para viver (moradia, alimentação). Desejos são gastos que trazem conforto ou prazer, mas não são indispensáveis (lazer, tecnologia nova).",
+  example:"Ex: pagar aluguel é necessidade; trocar de celular sem motivo é desejo.",
+  q:"Qual das opções é uma necessidade?",opts:["Assinatura de streaming","Conta de energia elétrica","Jogo novo"],correct:1,
+  explain:"A conta de energia é essencial para manter a casa funcionando."},
+ {title:"Juros Compostos",text:"Juros compostos são calculados sobre o valor total acumulado (incluindo juros anteriores), não só sobre o valor inicial. Por isso o crescimento acelera com o tempo.",
+  example:"Ex: R$100 a 10% ao mês vira R$110, depois R$121, depois R$133,10...",
+  q:"Em juros compostos, sobre o que incide o juro do mês seguinte?",opts:["Só o valor inicial","O valor inicial + juros já ganhos","Um valor fixo sempre"],correct:1,
+  explain:"O juro incide sobre o total acumulado, por isso o crescimento é mais rápido que no juro simples."},
+ {title:"Reserva de Emergência",text:"É um valor guardado para imprevistos (perda de renda, despesas médicas). Especialistas sugerem de 3 a 6 meses de despesas guardadas.",
+  example:"Ex: se você gasta R$1.500/mês, uma reserva razoável seria entre R$4.500 e R$9.000.",
+  q:"Qual a principal função da reserva de emergência?",opts:["Comprar coisas supérfluas","Cobrir imprevistos sem se endividar","Investir em ações de risco"],correct:1,
+  explain:"A reserva existe para dar segurança financeira diante de imprevistos, evitando dívidas."},
+ {title:"Risco e Liquidez",text:"Risco é a chance de um investimento perder valor. Liquidez é a facilidade de transformar um investimento em dinheiro rapidamente, sem perder valor.",
+  example:"Ex: dinheiro guardado tem alta liquidez; um imóvel tem baixa liquidez.",
+  q:"Verdadeiro ou falso: um investimento de alta liquidez é fácil de resgatar rapidamente.",opts:["Verdadeiro","Falso"],correct:0,
+  explain:"Alta liquidez significa que é fácil converter o investimento em dinheiro sem demora."},
+ {title:"Endividamento",text:"Endividamento é o quanto uma pessoa deve em relação ao que recebe. Dívidas com juros altos, como cartão de crédito, crescem rápido se não forem pagas.",
+  example:"Ex: uma dívida de R$500 no cartão com juros altos pode quase dobrar em poucos meses.",
+  q:"Situação: você deve R$500 no cartão com juros altos. O que resolve melhor o problema?",opts:["Pagar só o mínimo todo mês","Pagar o valor total assim que possível","Fazer novas compras no cartão"],correct:1,
+  explain:"Pagar o valor total evita que os juros altos se acumulem sobre a dívida."},
+ {title:"Receita x Despesa",text:"Receita é todo dinheiro que entra (salário, renda extra). Despesa é todo dinheiro que sai (contas, compras). O equilíbrio entre os dois define se você guarda ou perde dinheiro no mês.",
+  example:"Ex: renda de R$2.000 com despesas de R$1.800 sobra R$200 no mês.",
+  q:"Situação: a renda é R$2.000 e as despesas somam R$2.300. O que aconteceu no mês?",opts:["Sobrou dinheiro","Faltou dinheiro (déficit)","Ficou exatamente no zero"],correct:1,
+  explain:"Despesas maiores que a renda geram déficit — você gastou mais do que recebeu."}
+];
+const CHALLENGES=[
+ ["c1","Termine um mês com pelo menos R$500 guardados",()=>S.saved>=500],
+ ["c2","Não ultrapasse sua renda mensal em despesas",()=>S.income>0&&S.expenses.reduce((a,e)=>a+e.value,0)<=S.income],
+ ["c3","Monte uma reserva de 3x seus gastos mensais",()=>{let e=S.expenses.reduce((a,x)=>a+x.value,0);return e>0&&S.saved>=e*3;}],
+ ["c4","Alcance uma meta em até 6 meses de prazo",()=>S.goals.some(g=>g.months<=6&&g.current>=g.value)],
+ ["c5","Mantenha gastos abaixo de 30% da renda",()=>S.income>0&&S.expenses.reduce((a,e)=>a+e.value,0)<S.income*0.3]
+];
+function checkChallenges(){
+  CHALLENGES.forEach(([id,lb,fn])=>{if(!S.challenges.includes(id)&&fn()){S.challenges.push(id);S.xp+=15;}});
+  checkAllBadges();
+  save();
+}
+const LIBRARY=[
+ ["Economia","O que é economia pessoal","Economia pessoal é organizar receitas e despesas para atingir objetivos com equilíbrio financeiro."],
+ ["Orçamento","Como montar um orçamento","Um orçamento lista toda a renda e os gastos previstos, ajudando a decidir para onde o dinheiro vai antes de gastar."],
+ ["Poupança","Por que poupar todo mês","Guardar uma parte fixa da renda, mesmo pequena, cria o hábito de poupar antes de gastar o resto."],
+ ["Juros","Juros simples x compostos","No juro simples o valor cresce de forma linear; no composto, o juro incide também sobre juros anteriores."],
+ ["Inflação","O que a inflação faz com seu dinheiro","Inflação é o aumento geral dos preços; ela reduz o poder de compra do dinheiro parado."],
+ ["Consumo","Consumo consciente","Consumir de forma consciente é avaliar se uma compra é realmente necessária antes de decidir."],
+ ["Crédito","Como o crédito funciona","Crédito é dinheiro emprestado que precisa ser devolvido, geralmente com juros — usar demais gera dívidas."],
+ ["Planejamento","Planejamento financeiro mensal","Planejar o mês envolve prever receitas, organizar despesas e definir quanto será guardado."]
+];
+const ICONS={
+ home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>',
+ chart:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V10M12 19V5M19 19v-7"/></svg>',
+ target:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="3"/></svg>',
+ book:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7v14H4zM20 5h-7v14h7z"/></svg>',
+ user:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1-4 4-6.5 7-6.5s6 2.5 7 6.5"/></svg>',
+ trophy:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v3a5 5 0 01-10 0V4z"/><path d="M7 5H4v2a3 3 0 003 3M17 5h3v2a3 3 0 01-3 3"/><path d="M12 12v4M9 20h6M10.5 16h3v4h-3z"/></svg>',
+ calendar:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 9.5h16M8 3v4M16 3v4"/></svg>',
+ coin:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10c0-1.2 1.1-2 2.5-2s2.5.8 2.5 2-1.1 1.7-2.5 2-2.5.8-2.5 2 1.1 2 2.5 2 2.5-.8 2.5-2" stroke-linecap="round"/></svg>',
+ check:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>',
+ shield:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/></svg>',
+ flame:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c2 3-1 4-1 7a3 3 0 106 0c0-1-.5-2-1-2.5.7 2 .3 4-1 5.3A5 5 0 019 17a5 5 0 01-1.5-9.5C8.5 6 9.5 4.5 12 3z"/></svg>'
+};
+function ico(n){return ICONS[n]||'';}
+function shuffle3(correctVal,w1,w2){
+  let opts=[correctVal,w1,w2],idxs=[0,1,2].sort(()=>Math.random()-0.5);
+  return {opts:idxs.map(i=>opts[i]),correct:idxs.indexOf(0)};
+}
+function qRendaDespesa(){
+  let inc=Math.round((800+Math.random()*4200)/100)*100;
+  let exp=Math.round((inc*(0.5+Math.random()*0.8))/100)*100;
+  let diff=inc-exp;
+  let correct=diff>0?`Sobrou ${fmt(diff)}`:(diff<0?`Faltou ${fmt(Math.abs(diff))}`:'Ficou exatamente no zero');
+  let wrong1=diff>=0?`Faltou ${fmt(Math.abs(diff)+200)}`:`Sobrou ${fmt(Math.abs(diff)+200)}`;
+  let wrong2=diff===0?`Sobrou ${fmt(500)}`:'Ficou exatamente no zero';
+  let s=shuffle3(correct,wrong1,wrong2);
+  return {q:`Renda de ${fmt(inc)} e despesas de ${fmt(exp)}. O que aconteceu no mês?`,opts:s.opts,correct:s.correct,
+   explain:`Renda menos despesas = ${fmt(diff)}.`};
+}
+function qEconomiaPct(){
+  let inc=Math.round((1000+Math.random()*4000)/100)*100;
+  let pct=[5,10,15,20,25,30][Math.floor(Math.random()*6)];
+  let correctVal=inc*pct/100,wrong1=inc*(pct+10)/100,wrong2=inc*Math.max(pct-10,1)/100;
+  let s=shuffle3(fmt(correctVal),fmt(wrong1),fmt(wrong2));
+  return {q:`Guardando ${pct}% de uma renda de ${fmt(inc)}, quanto você economiza no mês?`,opts:s.opts,correct:s.correct,
+   explain:`${pct}% de ${fmt(inc)} é ${fmt(correctVal)}.`};
+}
+function qJurosSimples(){
+  let principal=Math.round((500+Math.random()*4500)/100)*100;
+  let taxa=[1,2,3,4,5][Math.floor(Math.random()*5)],meses=[1,2,3,6][Math.floor(Math.random()*4)];
+  let juros=principal*taxa/100*meses,wrong1=principal*taxa/100,wrong2=juros*2;
+  let s=shuffle3(fmt(juros),fmt(wrong1),fmt(wrong2));
+  return {q:`A ${taxa}% de juros simples ao mês, quanto de juros ${fmt(principal)} geram em ${meses} ${meses>1?'meses':'mês'}?`,opts:s.opts,correct:s.correct,
+   explain:`Juros simples = capital × taxa × tempo = ${fmt(principal)} × ${taxa}% × ${meses} = ${fmt(juros)}.`};
+}
+const VF_POOL=[
+ ['Juros compostos crescem mais rápido que juros simples ao longo do tempo.',true],
+ ['Ter uma reserva de emergência é desnecessário se você tem cartão de crédito.',false],
+ ['Inflação reduz o poder de compra do dinheiro guardado parado.',true],
+ ['Quanto maior a liquidez de um investimento, mais fácil é transformá-lo em dinheiro.',true],
+ ['Pagar apenas o mínimo da fatura do cartão elimina os juros da dívida.',false],
+ ['Um orçamento ajuda a decidir para onde o dinheiro vai antes de gastar.',true]
+];
+function qConceitual(){
+  let[stmt,val]=VF_POOL[Math.floor(Math.random()*VF_POOL.length)];
+  return {q:`Verdadeiro ou falso: ${stmt}`,opts:['Verdadeiro','Falso'],correct:val?0:1,
+   explain:val?'A afirmação está correta.':'A afirmação está incorreta.'};
+}
+const QUIZ_TEMPLATES=[qRendaDespesa,qEconomiaPct,qJurosSimples,qConceitual];
+function todayStr(){let d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function ensureDailyQuiz(){
+  let t=todayStr();
+  if(S.dailyQuiz.date!==t)S.dailyQuiz={date:t,answered:0,correct:0,current:null};
+  if(S.dailyQuiz.answered<5&&!S.dailyQuiz.current)S.dailyQuiz.current=QUIZ_TEMPLATES[Math.floor(Math.random()*QUIZ_TEMPLATES.length)]();
+  save();
+}
+function renderDailyQuiz(){
+  ensureDailyQuiz();
+  let dq=S.dailyQuiz;
+  if(dq.answered>=5)return `<div class="card"><div class="label">Quiz diário</div><p class="small">Você já respondeu os 5 de hoje (${dq.correct}/5 acertos). Volte amanhã para mais!</p></div>`;
+  let q=dq.current;
+  return `<div class="card"><div class="label">Quiz diário — ${dq.answered}/5 hoje</div>
+   <div class="lesson-q"><b class="small">${q.q}</b>
+   ${q.opts.map((o,j)=>`<label><input type="radio" name="dqz" value="${j}">${o}</label>`).join('')}
+   <button class="btn" onclick="checkDailyQuiz()">Verificar</button><div class="qz-result" id="dqzr"></div></div></div>`;
+}
+function checkDailyQuiz(){
+  let sel=document.querySelector('input[name=dqz]:checked');let box=document.getElementById('dqzr');
+  if(!sel){box.textContent='Selecione uma opção.';box.style.color='var(--warn)';return;}
+  let q=S.dailyQuiz.current,ok=+sel.value===q.correct;
+  box.textContent=(ok?'✅ Correto! ':'❌ Não foi essa. ')+q.explain;
+  box.style.color=ok?'var(--accent)':'var(--danger)';
+  S.dailyQuiz.answered++;if(ok){S.dailyQuiz.correct++;S.dailyQuizLifetimeCorrect=(S.dailyQuizLifetimeCorrect||0)+1;S.xp+=3;}
+  S.dailyQuiz.current=null;checkAllBadges();save();
+  setTimeout(()=>{if(current==='learn')render('learn');},1200);
+}
+let S=load(), current='home';
+function defaultState(){return{started:false,theme:null,name:'',profile:'',income:0,balance:0,saved:0,
+ month:1,maxMonths:12,expenses:[],goals:[],history:[],xp:0,achievements:[],challenges:[],pendingIncomeBonus:0,totalIncome:0,totalExpenses:0,
+ quizCorrect:0,quizTotal:0,quizAnswered:[],log:[],dailyQuiz:{date:'',answered:0,correct:0,current:null},
+ totalExpensesAdded:0,dailyQuizLifetimeCorrect:0};}
+function load(){try{let s=localStorage.getItem('finsim_state');return s?Object.assign(defaultState(),JSON.parse(s)):defaultState();}catch(e){return defaultState();}}
+function save(){try{localStorage.setItem('finsim_state',JSON.stringify(S));}catch(e){}}
+function fmt(v){return 'R$ '+(+v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function updateTheme(){if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);else document.documentElement.removeAttribute('data-theme');document.getElementById('themeBtn').textContent=((S.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark'?'☀':'◐');}
+function toggleTheme(){let cur=S.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');S.theme=cur==='dark'?'light':'dark';save();updateTheme();}
+function openModal(html){document.getElementById('modalBody').innerHTML=html;document.getElementById('overlay').classList.remove('hidden');}
+function closeModal(){document.getElementById('overlay').classList.add('hidden');}
+function awardAch(id){if(!S.achievements.includes(id))S.achievements.push(id);}
+function levelInfo(){let lvl=Math.floor(S.xp/50)+1;let titles=[[1,'Iniciante'],[3,'Aprendiz'],[5,'Planejador'],[7,'Estrategista'],[9,'Mestre Financeiro']];let t='Iniciante';titles.forEach(([m,n])=>{if(lvl>=m)t=n;});return{lvl,t,pct:S.xp%50/50*100};}
+function render(screen){
+  current=screen;
+  let map={home:renderHome,setup:renderSetup,app:renderDashboard,goals:renderGoals,learn:renderLearn,profile:renderProfile};
+  document.getElementById('app').innerHTML=map[screen]()+renderNav();
+  updateTheme();
+}
+function renderNav(){
+  let items=[['home','home','Início'],['app','chart','Simulação'],['goals','target','Metas'],['learn','book','Aprender'],['profile','user','Perfil']];
+  return '<nav id="bottomnav">'+items.map(([id,ic,lb])=>`<button class="${current===id?'active':''}" onclick="render('${id}')"><span class="ic">${ico(ic)}</span>${lb}</button>`).join('')+'</nav>';
+}
+function renderHome(){
+  return `<div class="hero">
+   <div class="logo">Fin<span>Sim</span></div>
+   <p class="tagline">Suas escolhas. Seu futuro.</p>
+   <div class="cta-row">
+     <button class="btn primary" onclick="render('${S.started?'app':'setup'}')">${S.started?'Continuar simulação':'Começar simulação'}</button>
+   </div>
+  </div>
+  <div class="card"><div class="label">Como funciona</div>
+   <p class="small" style="margin-bottom:10px">Receita → Despesas → Decisões → Imprevistos → Metas → Resultado → Aprendizado.</p>
+   <p class="small">Você recebe uma renda fictícia, cadastra gastos, enfrenta eventos e decisões, acompanha metas e vê o resultado das suas escolhas — tudo com dinheiro virtual, sem nenhum vínculo bancário real.</p>
+  </div>
+  <p class="disclaimer">Projeto educativo. Valores fictícios — não é uma instituição financeira real.</p>`;
+}
+function renderSetup(){
+  return `<h2>Criar simulação</h2>
+  <form onsubmit="return false;">
+  <label>Perfil</label>
+  <div class="opts-row" id="profileOpts">${['Estudante','Jovem trabalhador','Trabalhador','Família'].map(p=>`<button type="button" class="${S.profile===p?'sel':''}" onclick="pickProfile(this,'${p}')">${p}</button>`).join('')}</div>
+  <label for="incomeI">Renda mensal fictícia</label>
+  <input id="incomeI" type="number" min="0" placeholder="Ex: 2000" value="${S.income||''}">
+  <label>Objetivo</label>
+  <div class="opts-row" id="goalOpts">${GOAL_PRESETS.map(g=>`<button type="button" class="${S.goalDraftName===g?'sel':''}" onclick="pickGoal(this,'${g}')">${g}</button>`).join('')}<button type="button" class="${S.goalDraftName==='custom'?'sel':''}" onclick="pickGoal(this,'custom')">Personalizado</button></div>
+  <div id="customGoalWrap" style="display:${S.goalDraftName==='custom'?'block':'none'}">
+    <label for="customGoalI">Nome do objetivo</label><input id="customGoalI" placeholder="Ex: Curso de inglês" value="${S.goalDraftCustom||''}">
+  </div>
+  <label for="goalValueI">Valor da meta</label><input id="goalValueI" type="number" min="0" placeholder="Ex: 3000">
+  <label for="goalMonthsI">Prazo (meses)</label><input id="goalMonthsI" type="number" min="1" placeholder="Ex: 8">
+  <label for="initialI">Valor inicial disponível</label><input id="initialI" type="number" min="0" placeholder="Ex: 200">
+  <button class="btn primary block" onclick="startSim()">Começar simulação</button>
+  </form>`;
+}
+function pickProfile(btn,p){S.profile=p;document.querySelectorAll('#profileOpts button').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
+function pickGoal(btn,g){S.goalDraftName=g;document.querySelectorAll('#goalOpts button').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');document.getElementById('customGoalWrap').style.display=g==='custom'?'block':'none';}
+function startSim(){
+  let income=+document.getElementById('incomeI').value||0;
+  let goalName=S.goalDraftName==='custom'?(document.getElementById('customGoalI').value||'Meta personalizada'):(S.goalDraftName||'Meta personalizada');
+  let goalValue=+document.getElementById('goalValueI').value||0;
+  let goalMonths=+document.getElementById('goalMonthsI').value||12;
+  let initial=+document.getElementById('initialI').value||0;
+  S.started=true;S.income=income;S.balance=initial;S.saved=0;S.month=1;S.maxMonths=goalMonths;S.history=[initial];
+  S.expenses=[];S.totalIncome=0;S.totalExpenses=0;S.pendingIncomeBonus=0;
+  S.goals=goalValue>0?[{name:goalName,value:goalValue,months:goalMonths,current:0}]:[];
+  editingIndex=null;
+  S.xp+=10;save();render('app');
+}
+function healthInfo(){
+  if(S.balance<0)return['Crítica','health-bad'];
+  let rate=S.income>0?(S.saved/S.income):0;
+  if(rate>0.2)return['Saudável','health-ok'];
+  return['Atenção','health-warn'];
+}
+function renderDashboard(){
+  if(!S.started){
+    return `<h2>Simulação</h2><p>Você ainda não começou uma simulação.</p>
+    <div class="card"><div class="label">O que você vai acompanhar aqui</div>
+     <p class="small">Saldo atual, renda, gastos do mês, evolução num gráfico, metas, desafios e eventos aleatórios a cada mês que você avançar.</p>
+    </div>
+    <button class="btn primary block" onclick="render('setup')">Criar simulação</button>`;
+  }
+  if(S.month>S.maxMonths){
+    return `<h2>Simulação concluída</h2>
+    <p>Você chegou ao fim do prazo de ${S.maxMonths} meses.</p>
+    <div class="card big"><div class="label">Saldo final</div><div class="amount">${fmt(S.balance)}</div></div>
+    <button class="btn primary block" onclick="showReport()">Ver relatório final</button>
+    <button class="btn block" onclick="resetSim()">Reiniciar simulação</button>
+    <button class="btn block" onclick="render('goals')">Ver metas</button>`;
+  }
+  let totalExp=S.expenses.reduce((a,e)=>a+e.value,0);
+  checkChallenges();
+  let[hlabel,hclass]=healthInfo();
+  let catTotals=CATS.map(([c,ic])=>[c,ic,S.expenses.filter(e=>e.cat===c).reduce((a,e)=>a+e.value,0)]).filter(x=>x[2]>0);
+  let maxCat=Math.max(1,...catTotals.map(x=>x[2]));
+  return `<h2>Mês ${S.month} de ${S.maxMonths}</h2>
+  <div class="card big"><div class="label">Saldo atual</div><div class="amount">${fmt(S.balance)}</div>
+   <span class="pill ${hclass}">${hlabel}</span></div>
+  <div class="grid3">
+   <div class="card"><div class="label">Renda</div><div class="amount">${fmt(S.income)}</div></div>
+   <div class="card"><div class="label">Gastos/mês</div><div class="amount">${fmt(totalExp)}</div></div>
+   <div class="card"><div class="label">Economizado</div><div class="amount">${fmt(S.saved)}</div></div>
+  </div>
+  <div class="card"><div class="label">Evolução do saldo</div>${chartSVG(S.history)}</div>
+  ${S.goals.length?`<div class="card"><div class="label">Metas</div>
+   <div class="small">${S.goals.length} meta${S.goals.length>1?'s':''} em andamento — média de ${(S.goals.reduce((a,g)=>a+Math.min(100,g.current/g.value*100),0)/S.goals.length).toFixed(0)}% concluída</div>
+   <button class="btn" style="margin-top:8px" onclick="render('goals')">Ver detalhes</button>
+  </div>`:''}
+  <div class="card">
+   <div class="label">Despesas do mês</div>
+   ${S.expenses.length? S.expenses.map((e,i)=>`<div class="exp-row"><span><span class="ic">${(CATS.find(c=>c[0]===e.cat)||['','📦'])[1]}</span> ${e.desc||e.cat}${e.recurring===false?' <span class="small" style="color:var(--text-dim)">(avulso)</span>':''} — <b>${fmt(e.value)}</b></span><span><button class="edit" onclick="editExpense(${i})">✎</button><button class="del" onclick="delExpense(${i})">✕</button></span></div>`).join(''):'<p class="small">Nenhuma despesa cadastrada ainda.</p>'}
+   <form onsubmit="return false;" style="margin-top:10px">
+    <select id="expCat">${CATS.map(([c])=>`<option value="${c}" ${editingIndex!==null&&S.expenses[editingIndex].cat===c?'selected':''}>${c}</option>`).join('')}</select>
+    <input id="expDesc" placeholder="Descrição (opcional)" style="margin-top:8px" value="${editingIndex!==null?(S.expenses[editingIndex].desc||''):''}">
+    <input id="expVal" type="number" min="0" placeholder="Valor" style="margin-top:8px" value="${editingIndex!==null?S.expenses[editingIndex].value:''}">
+    <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-weight:400"><input type="checkbox" id="expRec" style="width:auto" ${(editingIndex===null||S.expenses[editingIndex].recurring!==false)?'checked':''}> Recorrente (repete todo mês)</label>
+    <button type="button" class="btn block" onclick="saveExpenseUI()">${editingIndex!==null?'Salvar edição':'Adicionar gasto'}</button>
+    ${editingIndex!==null?'<button type="button" class="btn block" onclick="editingIndex=null;render(\'app\')">Cancelar edição</button>':''}
+   </form>
+   ${catTotals.length?donutSVG(catTotals)+'<div class="label" style="margin-top:14px">Por categoria</div>'+catTotals.map(([c,ic,v])=>`<div class="small"><span class="ic">${ic}</span> ${c} — ${fmt(v)}<div class="progress"><div class="progress-fill" style="width:${v/maxCat*100}%"></div></div></div>`).join(''):''}
+  </div>
+  <div class="card"><div class="label">Desafios</div>
+   ${CHALLENGES.map(([id,lb])=>`<div class="small">${S.challenges.includes(id)?'✓':'○'} ${lb}</div>`).join('')}
+  </div>
+  <button class="btn primary block" onclick="advanceMonth()">Avançar para o próximo mês</button>
+  <button class="btn block" onclick="showReport()">Ver relatório da simulação</button>`;
+}
+let editingIndex=null;
+function saveExpenseUI(){
+  let cat=document.getElementById('expCat').value,desc=document.getElementById('expDesc').value,val=+document.getElementById('expVal').value;
+  let recurring=document.getElementById('expRec').checked;
+  if(!val||val<=0)return;
+  if(editingIndex!==null){S.expenses[editingIndex]={cat,desc,value:val,recurring};editingIndex=null;}
+  else{S.expenses.push({cat,desc,value:val,recurring});S.totalExpensesAdded=(S.totalExpensesAdded||0)+1;S.xp+=2;}
+  save();render('app');
+}
+function donutSVG(catTotals){
+  let total=catTotals.reduce((a,x)=>a+x[2],0)||1,offset=0;
+  let segs=catTotals.map((x,i)=>{
+    let pct=x[2]/total*100;
+    let seg=`<circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--accent)" stroke-opacity="${Math.max(0.18,1-i*0.15).toFixed(2)}" stroke-width="6" stroke-dasharray="${pct.toFixed(2)} ${(100-pct).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 21 21)"/>`;
+    offset+=pct;return seg;
+  }).join('');
+  return `<svg viewBox="0 0 42 42" width="120" height="120" style="display:block;margin:8px auto;">${segs}</svg>`;
+}
+function editExpense(i){editingIndex=i;render('app');}
+function delExpense(i){S.expenses.splice(i,1);editingIndex=null;save();render('app');}
+function chartSVG(hist){
+  let h=hist.length?hist:[0,0];if(h.length<2)h=[h[0],h[0]];
+  let max=Math.max(...h,1),min=Math.min(...h,0),range=(max-min)||1;
+  let pts=h.map((v,i)=>`${(i/(h.length-1))*300},${75-((v-min)/range)*65}`).join(' ');
+  return `<svg viewBox="0 0 300 80" class="chart" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+let pendingEv=null;
+function advanceMonth(){
+  if(S.month>S.maxMonths){render('app');return;}
+  editingIndex=null;
+  let inc=S.income+(S.pendingIncomeBonus||0);S.pendingIncomeBonus=0;
+  let totalExpenses=S.expenses.reduce((a,e)=>a+e.value,0);
+  S.balance+=inc-totalExpenses;S.totalIncome+=inc;S.totalExpenses+=totalExpenses;
+  S.expenses=S.expenses.filter(e=>e.recurring!==false);save();
+  let ev=pickEvent();
+  pendingEv={ev,inc,totalExpenses};
+  openModal(`<h3>${ev.title}</h3><p class="small">Nível: ${LVL[ev.level]}</p><p>${ev.desc}</p>${ev.options.map((o,i)=>`<button class="btn opt" onclick="resolveEvent(${i})">${o.label}</button>`).join('')}`);
+}
+function resolveEvent(i){
+  let{ev,inc,totalExpenses}=pendingEv,opt=ev.options[i];
+  S.balance+=opt.balance||0;S.saved+=opt.saved||0;
+  if(opt.incomeBonus)S.pendingIncomeBonus=opt.incomeBonus;
+  S.history.push(S.balance);
+  S.log.push({month:S.month,event:ev.title,choice:opt.label,balance:S.balance});
+  S.month++;S.xp+=10;
+  if(S.month>=5)awardAch('5_meses');
+  if(S.month>=10)awardAch('10_meses');
+
+  save();
+  openModal(`<h3>Resumo do mês</h3>
+   <p class="small">Renda: ${fmt(inc)}<br>Gastos: ${fmt(totalExpenses)}<br>Evento: ${ev.title} → ${opt.label}<br>
+   <b>Saldo atual: ${fmt(S.balance)}</b><br>Economizado: ${fmt(S.saved)}</p>
+   <button class="btn primary block" onclick="closeModal();render('app')">Continuar</button>`);
+}
+function showReport(){
+  let growth=S.history.length>1?S.history[S.history.length-1]-S.history[0]:0;
+  let growthTxt=growth>0?`Seu saldo cresceu ${fmt(growth)} desde o início.`:growth<0?`Seu saldo caiu ${fmt(Math.abs(growth))} desde o início.`:`Seu saldo se manteve estável desde o início.`;
+  let savedRate=S.totalIncome>0?S.saved/S.totalIncome:0;
+  let savedTxt=savedRate>=0.15?'Você manteve um bom ritmo de economia ao longo da simulação.':'Boa parte da renda foi usada em gastos e eventos — guardar uma fração maior todo mês fortaleceria sua reserva.';
+  openModal(`<h3>Relatório da simulação</h3>
+  ${chartSVG(S.history)}
+  <p class="small">Meses simulados: ${S.month-1}<br>Renda total recebida: ${fmt(S.totalIncome)}<br>
+  Gastos totais: ${fmt(S.totalExpenses)}<br>Economizado: ${fmt(S.saved)}<br>Saldo atual: ${fmt(S.balance)}<br>
+  Metas alcançadas: ${S.goals.filter(g=>g.current>=g.value).length} de ${S.goals.length}</p>
+  <p class="small"><b>O que aconteceu com suas escolhas?</b> ${growthTxt} ${savedTxt} Não existe um caminho "certo" único — apenas consequências diferentes para cada escolha.</p>
+  <button class="btn primary block" onclick="closeModal()">Fechar</button>`);
+}
+function renderGoals(){
+  if(!S.started){
+    return `<h2>Metas</h2><p>Crie uma simulação primeiro para poder definir metas.</p>
+    <div class="card"><div class="label">Como funciona</div>
+     <p class="small">Depois de iniciar, você cria metas com nome, valor e prazo — como "Notebook, R$2.500, 6 meses" — e destina parte do que economizar para cada uma, acompanhando o progresso em barras.</p>
+    </div>
+    <button class="btn primary block" onclick="render('setup')">Criar simulação</button>`;
+  }
+  return `<h2>Metas</h2>
+  ${S.goals.length?`<div class="card big"><div class="label">Total guardado para metas</div><div class="amount">${fmt(S.goals.reduce((a,g)=>a+g.current,0))}</div>
+   <span class="small">de ${fmt(S.goals.reduce((a,g)=>a+g.value,0))} no total</span></div>`:''}
+  ${S.goals.length?S.goals.map((g,i)=>{let pct=Math.min(100,g.current/g.value*100);return `<div class="card"><b>${g.name}</b><div class="small">${fmt(g.current)} de ${fmt(g.value)} · prazo ${g.months} meses</div>
+   <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div><div class="small">${pct.toFixed(0)}% concluído</div>
+   <div style="display:flex;gap:8px;margin-top:8px"><input type="number" min="1" max="${S.saved}" placeholder="Valor a destinar" id="contrib${i}" style="flex:1"><button class="btn" onclick="contribGoal(${i})">Destinar</button></div></div>`;}).join(''):'<p>Nenhuma meta criada ainda.</p>'}
+  <div class="card">
+   <div class="label">Nova meta</div>
+   <label>Nome</label><input id="ngName" placeholder="Ex: Notebook">
+   <label>Valor</label><input id="ngValue" type="number" min="1" placeholder="Ex: 2500">
+   <label>Prazo (meses)</label><input id="ngMonths" type="number" min="1" placeholder="Ex: 6">
+   <button class="btn primary block" onclick="addGoalUI()">Criar meta</button>
+  </div>`;
+}
+function addGoalUI(){
+  let name=document.getElementById('ngName').value,value=+document.getElementById('ngValue').value,months=+document.getElementById('ngMonths').value;
+  if(!name||!value)return;
+  S.goals.push({name,value,months:months||1,current:0});
+  checkAllBadges();save();render('goals');
+}
+function contribGoal(i){
+  let inp=document.getElementById('contrib'+i);let amt=Math.min(+inp.value||0,S.saved);
+  if(amt<=0)return;
+  S.saved-=amt;S.goals[i].current+=amt;
+  checkAllBadges();save();render('goals');
+}
+let learnTab='lessons';
+function setLearnTab(t){learnTab=t;render('learn');}
+function renderLearn(){
+  let tabs=[['lessons','Lições'],['daily','Quiz diário'],['library','Biblioteca']];
+  let body;
+  if(learnTab==='daily'){
+    body=`<p class="small">Perguntas geradas na hora, combinando números e conceitos — até 5 por dia.</p>${renderDailyQuiz()}`;
+  }else if(learnTab==='library'){
+    body=`<input id="libSearch" placeholder="Pesquisar por tema (ex: juros, crédito...)" oninput="filterLibrary()">
+    <div id="libList">${libraryHTML('')}</div>`;
+  }else{
+    body=`<p class="small" id="quizScore">${S.quizAnswered.length}/${LESSONS.length} lições respondidas${S.quizTotal>0?` · ${S.quizCorrect}/${S.quizTotal} acertos`:''}</p>
+    ${LESSONS.map((l,i)=>`<div class="card"><div class="label">Lição ${i+1} de ${LESSONS.length}${S.quizAnswered.includes(i)?' · concluída':''}</div><h3>${l.title}</h3><p>${l.text}</p><p class="small">${l.example}</p>
+     <div class="lesson-q"><b class="small">${l.q}</b>${l.opts.map((o,j)=>`<label><input type="radio" name="qz${i}" value="${j}">${o}</label>`).join('')}
+     <button class="btn" onclick="checkQuiz(${i})">Verificar resposta</button><div class="qz-result" id="qzr${i}"></div></div></div>`).join('')}`;
+  }
+  return `<h2>Aprenda</h2>
+  <div class="subtabs">${tabs.map(([id,lb])=>`<button class="${learnTab===id?'active':''}" onclick="setLearnTab('${id}')">${lb}</button>`).join('')}</div>
+  ${body}`;
+}
+function libraryHTML(q){
+  q=(q||'').toLowerCase();
+  let items=LIBRARY.filter(([cat,title,text])=>!q||cat.toLowerCase().includes(q)||title.toLowerCase().includes(q)||text.toLowerCase().includes(q));
+  if(!items.length)return '<p class="small">Nada encontrado.</p>';
+  return items.map(([cat,title,text])=>`<div class="card"><div class="label">${cat}</div><b>${title}</b><p class="small">${text}</p></div>`).join('');
+}
+function filterLibrary(){document.getElementById('libList').innerHTML=libraryHTML(document.getElementById('libSearch').value);}
+function checkQuiz(i){
+  let sel=document.querySelector(`input[name=qz${i}]:checked`);let box=document.getElementById('qzr'+i);
+  if(!sel){box.textContent='Selecione uma opção antes de verificar.';box.style.color='var(--warn)';return;}
+  let ok=+sel.value===LESSONS[i].correct;
+  box.textContent=(ok?'✅ Correto! ':'❌ Não foi dessa vez. ')+LESSONS[i].explain;
+  box.style.color=ok?'var(--accent)':'var(--danger)';
+  if(!S.quizAnswered.includes(i)){
+    S.quizAnswered.push(i);S.quizTotal++;if(ok){S.quizCorrect++;S.xp+=5;}
+    checkAllBadges();save();
+    let sc=document.getElementById('quizScore');if(sc)sc.textContent=`${S.quizAnswered.length}/${LESSONS.length} lições respondidas · ${S.quizCorrect}/${S.quizTotal} acertos`;
+  }
+}
+let badgesShown=9;
+function showMoreBadges(){badgesShown=Math.min(badgesShown+9,BADGES.length);render('profile');}
+function showLessBadges(){badgesShown=9;render('profile');}
+function renderProfile(){
+  checkAllBadges();
+  let{lvl,t,pct}=levelInfo();
+  let visible=BADGES.slice(0,badgesShown);
+  return `<h2>Perfil</h2>
+  <div class="card"><label>Nome (opcional)</label><input id="nameI" value="${S.name||''}" placeholder="Como quer ser chamado?" onchange="S.name=this.value;save()"></div>
+  <div class="card"><div class="label">Nível ${lvl} — ${t}</div><div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+  <div class="small">${S.xp} XP acumulados</div></div>
+  <div class="card"><div class="label">Conquistas — ${S.achievements.length}/${BADGES.length} desbloqueadas</div><div class="badges-grid">
+  ${visible.map(([id,ic,lb])=>`<div class="badge ${S.achievements.includes(id)?'':'locked'}"><span class="ic">${ico(ic)}</span>${lb}</div>`).join('')}
+  </div>
+  ${badgesShown<BADGES.length?`<button class="btn block" style="margin-top:10px" onclick="showMoreBadges()">Ver mais (${badgesShown}/${BADGES.length})</button>`:''}
+  ${badgesShown>9?`<button class="btn block" style="margin-top:8px" onclick="showLessBadges()">Ver menos</button>`:''}
+  </div>
+  ${S.log.length?`<div class="card"><div class="label">Histórico</div>
+  ${S.log.slice(-12).reverse().map(h=>`<div class="small">Mês ${h.month}: ${h.event} → ${h.choice} (saldo: ${fmt(h.balance)})</div>`).join('')}
+  </div>`:''}
+  <button class="btn block" onclick="resetSim()">Reiniciar simulação</button>`;
+}
+function resetSim(){
+  openModal(`<h3>Reiniciar simulação</h3><p class="small">Isso apaga todo o progresso da simulação atual.</p>
+   <button class="btn primary block" onclick="doReset()">Sim, reiniciar</button>
+   <button class="btn block" onclick="closeModal()">Cancelar</button>`);
+}
+function doReset(){S=defaultState();editingIndex=null;save();closeModal();render('home');}
+render('home');
+</script>
+</body>
+</html>
